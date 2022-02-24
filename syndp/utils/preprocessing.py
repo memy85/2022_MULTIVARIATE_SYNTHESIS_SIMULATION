@@ -36,8 +36,8 @@ def undummify(data :pd.DataFrame, columns :list, prefix_separator="-"):
 
     undummified_list  = []
     for col in columns:
-           undummified = data.filter(like=col).idxmax(axis=1).apply(lambda x : x.split(prefix_separator, maxsplit=1)[1]).rename(col)
-       undummified_list.append(undummified) 
+        undummified = data.filter(like=col).idxmax(axis=1).apply(lambda x : x.split(prefix_separator, maxsplit=1)[1]).rename(col)
+        undummified_list.append(undummified) 
     
     recovered_data = pd.concat([data1, *undummified_list], axis=1)
     return recovered_data
@@ -61,4 +61,20 @@ def do_scaling(data : pd.DataFrame, columns : list):
     
     scaled_data = pd.concat([scaled,data1], axis=1)
     return scaled_data, scaler
+
+
+def reverse_scaling(data : pd.DataFrame, columns : list, scaler : MinMaxScaler):
+    '''
+    reverse the scaled data to original form
+    data : scaled data
+    columns : continuous columns - should be the same as the original scaling process
+    scaler : Minmax scaler from do_scaling function
+    '''
+    excluded_cols = [col for col in data.columns if col not in columns]
     
+    data1 = data[excluded_cols].copy()
+    inversed = scaler.inverse_transform(data[columns])
+    inversed = pd.DataFrame(inversed, columns=columns)
+    
+    reversed_data = pd.concat([data1, inversed], axis=1)
+    return reversed_data
